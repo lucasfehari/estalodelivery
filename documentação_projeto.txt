@@ -1,0 +1,83 @@
+# 🚀 Documentação Oficial: Estalo (Marketplace & Quick Commerce Local)
+
+## 1. Visão Geral do Produto
+O **Estalo** é um aplicativo de marketplace e conveniência ultrarrápida (Quick Commerce) focado no comércio local. Ele une a experiência de descoberta visual imersiva do TikTok/Instagram com a facilidade de compra com um clique.
+
+**O Grande Diferencial:** O aplicativo não é uma lista telefônica de restaurantes. É uma vitrine de alto padrão que atende desde o artesão de hambúrguer até a loja de eletrônicos do centro. O modelo de negócios embute um serviço de agência de marketing (produção audiovisual) para transformar pequenos comércios em marcas premium e gerar desejo/resolução instantânea no cliente.
+
+---
+
+## 2. Branding e Posicionamento
+* **Nome de Interface:** Estalo (Curto, forte, remete a velocidade e desejo).
+* **Posicionamento:** A "Sacola da Cidade". Foco em resolver a vida do cliente em um "estalo", seja com uma esfiha artesanal ou um cabo de iPhone de emergência no meio do expediente. 
+
+---
+
+## 3. Arquitetura Técnica (A Stack)
+O sistema utiliza uma arquitetura separada (Decoupled) focada em escalabilidade extrema e na facilidade de transição para aplicativos nativos (Mobile-First).
+
+* **Front-end (O Rosto):** Vue.js com Nuxt 3. Responsável pelo Feed dinâmico de vídeos (estilo Reels), navegação fluida e Lazy Loading para máxima performance no celular.
+* **Back-end (O Cérebro):** Python com FastAPI. Responsável pelas regras de negócio, transações, validações de segurança (Pydantic), controle de assinaturas e WebSockets (para rastreamento ao vivo).
+* **Banco de Dados (O Cofre):** PostgreSQL. Banco de dados relacional, robusto e imune a perdas financeiras.
+
+---
+
+## 4. Modelo de Monetização e Regras de Negócio
+A API em Python controla ativamente a visibilidade e os recursos de cada loja com base na sua assinatura.
+
+* **Plano Básico:** Presença no app com upload de fotos simples.
+* **Plano Premium (O Core Business - Serviço de Marketing):** * Mensalidade mais alta que inclui o serviço de produção audiovisual do Fehari Studio.
+  * **Selo Estalo Premium:** O algoritmo de busca e o Feed priorizam e forçam a exibição destes perfis no topo.
+  * Liberação do player de vídeo no perfil da loja e no Feed principal.
+
+---
+
+## 5. Entidades Principais (O Banco de Dados - Fase 1)
+Estrutura relacional base para a IA gerar os modelos (FastAPI/Pydantic/SQLAlchemy):
+
+### 🧑‍🍳 Entidade: Vendedor (Loja)
+* `id_vendedor` (UUID - Único)
+* `nome_marca` (String)
+* `descricao` (String)
+* `plano_premium` (Boolean: True/False)
+* `saldo_creditos` (Integer - Opcional)
+
+### 📦 Entidade: Produto (Postagem/Lanche/Varejo)
+* `id_produto` (UUID - Único)
+* `id_vendedor` (Relacionamento: Chave Estrangeira)
+* `titulo` (String)
+* `preco` (Float/Decimal)
+* `categoria` (Enum: "Alimentacao" ou "Varejo")
+* `precisa_preparo` (Boolean: True para lanches, False para eletrônicos prontos na prateleira)
+* `link_midia_aws` (String - URL da foto ou vídeo hospedado na nuvem)
+
+### 🛒 Entidade: Pedido
+* `id_pedido` (UUID - Único)
+* `id_cliente` (Relacionamento)
+* `id_vendedor` (Relacionamento)
+* `status` (String - Pendente, Preparando/Separando, Saiu para Entrega, Concluído)
+* `valor_total` (Float/Decimal)
+
+---
+
+## 6. Módulo de Logística e Escala (Fase 2)
+O sistema evoluirá de entregas próprias para uma frota terceirizada com rastreamento em tempo real.
+
+### 🛵 Entidade: Entregador (Motoboy)
+* `id_motoboy` (UUID - Único)
+* `nome` (String)
+* `status_disponibilidade` (String - Online/Offline)
+* `localizacao_atual_lat` (Float)
+* `localizacao_atual_lng` (Float)
+
+### 🗺️ Rastreamento e Taxas (A Lógica)
+* **WebSockets (Python):** O servidor manterá uma conexão aberta para receber a latitude/longitude do motoboy a cada 5 segundos e empurrar para o front-end do cliente.
+* **Mapa Interativo (Nuxt):** O aplicativo consumirá a API de mapas para renderizar a rota.
+* **Taxa Dinâmica:** O Python calculará a distância entre a loja e o cliente no checkout.
+
+---
+
+## 7. Experiência do Usuário (UI/UX Front-end)
+* **Mobile-First:** Toda a interface deve ser projetada estritamente para a tela do celular.
+* **Feed Dinâmico:** Scroll vertical infinito na tela inicial, consumindo a rota do back-end que traz os vídeos em destaque com o botão "Pedir Agora" de fácil acesso.
+* **UX/Performance:** Uso obrigatório de *Skeletons* (telas de carregamento cinzas) enquanto as requisições `useFetch` aguardam o back-end, mantendo a percepção de velocidade.

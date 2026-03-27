@@ -1,0 +1,15 @@
+/* Diretivas obrigatórias do Tailwind CSS */
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Importa a fonte Inter do Google Fonts — elegante e moderna */
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap');
+
+/* Aplica Inter como fonte padrão em todo o app */
+@layer base {
+  body {
+    font-family: 'Inter', sans-serif;
+    -webkit-font-smoothing: antialiased;
+  }
+}

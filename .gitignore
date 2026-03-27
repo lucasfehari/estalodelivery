@@ -1,0 +1,94 @@
+# ============================================================
+#  ESTALO — .gitignore raiz do projeto
+#  Cobre: Frontend (Nuxt 3 / Node) + Backend (Python / FastAPI)
+# ============================================================
+
+# ──────────────────────────────────────────
+#  FRONTEND — Nuxt 3 / Node.js
+# ──────────────────────────────────────────
+
+# Dependências instaladas pelo npm
+frontend/node_modules/
+
+# Build e cache do Nuxt (gerados automaticamente)
+frontend/.nuxt/
+frontend/.output/
+frontend/dist/
+
+# Cache de desenvolvimento
+frontend/.cache/
+frontend/.nitro/
+
+# Variáveis de ambiente do frontend (nunca commitar segredos)
+frontend/.env
+frontend/.env.*
+!frontend/.env.example
+
+# Logs do Node
+frontend/npm-debug.log*
+frontend/yarn-debug.log*
+frontend/yarn-error.log*
+frontend/.pnpm-debug.log*
+
+
+# ──────────────────────────────────────────
+#  BACKEND — Python / FastAPI
+# ──────────────────────────────────────────
+
+# Ambiente virtual Python (dependências locais)
+api/venv/
+api/.venv/
+api/env/
+
+# Bytecode compilado pelo Python (desnecessário no repositório)
+api/__pycache__/
+api/**/__pycache__/
+api/*.py[cod]
+api/**/*.py[cod]
+
+# Pacotes de distribuição Python
+api/*.egg-info/
+api/dist/
+api/build/
+
+# Variáveis de ambiente do backend (chaves de API, senha do banco, etc.)
+api/.env
+api/.env.*
+!api/.env.example
+
+# Logs do servidor
+api/*.log
+api/logs/
+
+# Mypy / tipagem estática
+api/.mypy_cache/
+api/.dmypy.json
+
+# Pytest / testes
+api/.pytest_cache/
+api/htmlcov/
+api/.coverage
+
+
+# ──────────────────────────────────────────
+#  SISTEMA OPERACIONAL
+# ──────────────────────────────────────────
+
+# macOS
+.DS_Store
+.AppleDouble
+.LSOverride
+
+# Windows
+Thumbs.db
+ehthumbs.db
+Desktop.ini
+
+# ──────────────────────────────────────────
+#  EDITORES / IDEs
+# ──────────────────────────────────────────
+
+.vscode/
+.idea/
+*.sublime-project
+*.sublime-workspace
