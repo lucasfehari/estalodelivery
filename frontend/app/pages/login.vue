@@ -1,269 +1,249 @@
 <script setup lang="ts">
-// definePageMeta: metadados do Nuxt para esta rota específica
+/**
+ * ARQUIVO: login.vue
+ * PROJETO: Estalo (Quick Commerce)
+ * DESCRIÇÃO: Tela de Login re-desenhada seguindo a nova identidade visual.
+ *            Possui as tecnologias exigidas: Vue 3 (Composition API),
+ *            Tailwind CSS e Nuxt 3.
+ */
+
+import { ref, reactive } from 'vue'
+import { useRouter } from 'vue-router'
+
+// Usamos definePageMeta para garantir que a tela de login preencha a página toda 
+// e não herde layouts indesejados (como navbars de usuários já logados).
 definePageMeta({
-  layout: false, // Sem layout padrão — a tela de login é autossuficiente
+  layout: false,
 })
 
-// useRouter: navegação programática do Nuxt
 const router = useRouter()
 
-// Estado reativo do formulário
+// Injeção de dependências do cabeçalho da página de forma dinâmica via Nuxt (useHead).
+// Isso carrega as fontes 'Plus Jakarta Sans' e 'Inter' sem poluir o estilo global.
+useHead({
+  link: [
+    {
+      rel: 'stylesheet',
+      href: 'https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Inter:wght@400;500;600&display=swap'
+    },
+    {
+      rel: 'stylesheet',
+      href: 'https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap'
+    }
+  ],
+  style: [
+    // Preenche o ícone do google e configurações de grade base do material UI
+    {
+      innerHTML: `
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+      `
+    }
+  ]
+})
+
+// === ESTADO REATIVO DO FORMULÁRIO ===
+// Mantemos os campos em um objeto 'reactive' para facilidade de envio no futuro ao FastAPI.
 const form = reactive({
   email: '',
   senha: '',
 })
 
-// Controle de estado da UI
-const carregando = ref(false)    // Bloqueia o botão durante a requisição
-const senhaVisivel = ref(false)  // Alterna entre texto e password
-const erroLogin = ref('')        // Mensagem de erro vinda do back-end
+// === CONTROLES DE ESTADO VISUAL ===
+const carregando = ref(false)       // Bloqueia interações em botões enquanto comunica com o back-end
+const senhaVisivel = ref(false)     // Variável responsável por alternar o tipo de input da senha ("password" / "text")
+const erroLogin = ref('')           // Feedback visual de falhas para o cliente
 
-// Função principal de login — futuramente consumirá o FastAPI
+/**
+ * Função responsável por lidar com o Login.
+ * Realiza as validações e futuramente chamará a API no FastAPI (`/api/auth/login`).
+ */
 async function handleLogin() {
-  erroLogin.value = ''
+  erroLogin.value = '' // Limpa erros passados.
 
-  // Validação mínima no front antes de bater na API
+  // 1. Validação simples no front-end para economizar requisições vazias pro banco
   if (!form.email || !form.senha) {
     erroLogin.value = 'Preencha e-mail e senha para continuar.'
     return
   }
 
-  carregando.value = true
+  carregando.value = true // Entra em modo loading visual (UX fluid animation)
 
   try {
-    // TODO: Substituir por $fetch('/api/auth/login', { method: 'POST', body: form })
-    // quando o back-end FastAPI estiver pronto.
-    // Por enquanto, simula um delay de rede para demonstrar o loading state.
+    // 2. Simulação de processamento de API.
+    // TODO: Integrar com Pydantic / FastAPI -> $fetch('/api/auth/login', { body: form })
     await new Promise((resolve) => setTimeout(resolve, 1500))
-
-    // Redireciona para o feed principal após login bem-sucedido
+    
+    // 3. Sucesso: Redireciona o cliente para o feed principal da plataforma
     await router.push('/')
   } catch (err: any) {
-    // Exibe a mensagem de erro retornada pelo FastAPI (ex: "Credenciais inválidas")
-    erroLogin.value = err?.data?.detail || 'Erro ao conectar. Tente novamente.'
+    // 4. Captura erro via pydantic details e avisa o usuário (UX de erro limpa).
+    erroLogin.value = err?.data?.detail || 'Credenciais inválidas. Tente novamente.'
   } finally {
-    carregando.value = false
+    carregando.value = false // Libera os elementos desativados.
   }
 }
 </script>
 
 <template>
-  <!--
-    Layout geral: fundo escuro degradê do Estalo.
-    min-h-screen garante que cobre a tela inteira mesmo sem conteúdo.
-    Usamos flex para centralizar verticalmente e horizontalmente.
-  -->
-  <div
-    class="min-h-screen flex items-center justify-center bg-gradient-to-br from-zinc-950 via-zinc-900 to-zinc-950 px-5 py-10"
-  >
-    <!--
-      Card de login:
-      - max-w-sm: largura máxima ideal para mobile-first (~384px)
-      - backdrop-blur + bg-white/5: efeito glassmorphism sutil
-      - ring-1/ring-white/10: borda fina para dar profundidade sem poluir
-      - animate-fade-in: animação de entrada suave (definida no tailwind.config)
-    -->
-    <div
-      class="w-full max-w-sm rounded-3xl bg-white/5 backdrop-blur-xl ring-1 ring-white/10 p-8 shadow-2xl"
-    >
+  <!-- Main Container: Fundo dinâmico ditado pelas cores Tailwind extendidas -->
+  <div class="bg-surface text-on-surface antialiased relative overflow-hidden flex flex-col justify-center min-h-[max(884px,100dvh)] font-body">
+    
+    <!-- Elementos decorativos (Visual Background Accents - Efeito Aurora/Glass) -->
+    <!-- São fixos, não bloqueiam cliques pointer-events-none e ficam atrás do formulário (-z-10) -->
+    <div class="fixed top-0 left-0 w-full h-full pointer-events-none z-0 overflow-hidden">
+      <!-- Glow superior esquerdo (Primário) -->
+      <div class="absolute -top-[10%] -left-[10%] w-[50%] h-[50%] rounded-full bg-primary/5 blur-[100px]"></div>
+      <!-- Glow inferior direito (Secundário) -->
+      <div class="absolute -bottom-[10%] -right-[10%] w-[50%] h-[50%] rounded-full bg-secondary/5 blur-[100px]"></div>
+    </div>
 
-      <!-- ====== CABEÇALHO / BRANDING ====== -->
-      <div class="mb-10 text-center">
-        <!--
-          Logo "Estalo" em texto:
-          - Degradê laranja→rosa→roxo remete à energia, velocidade e modernidade
-          - Texto grande e bold para impacto visual imediato
-          - bg-clip-text + text-transparent: técnica para aplicar gradiente no texto
-        -->
-        <h1
-          class="text-5xl font-black tracking-tighter bg-gradient-to-r from-orange-400 via-rose-400 to-violet-500 bg-clip-text text-transparent"
-        >
-          estalo
-        </h1>
-        <!-- Tagline da marca, extraída da documentação do projeto -->
-        <p class="mt-2 text-sm text-zinc-400 font-medium tracking-wide">
-          A sacola da cidade ⚡
-        </p>
-      </div>
-
-      <!-- ====== FORMULÁRIO DE LOGIN ====== -->
-      <!--
-        @submit.prevent: previne o comportamento padrão do HTML de recarregar a página
-        e chama nossa função handleLogin assíncrona.
-      -->
-      <form class="space-y-5" @submit.prevent="handleLogin">
-
-        <!-- CAMPO: E-mail -->
-        <div class="group">
-          <label
-            for="email"
-            class="block text-xs font-semibold text-zinc-400 uppercase tracking-widest mb-2"
-          >
-            E-mail
-          </label>
-          <!--
-            Ring colorida ao focar: reforça o branding laranja do Estalo.
-            transition-all garante que a animação da borda seja suave.
-          -->
-          <input
-            id="email"
-            v-model="form.email"
-            type="email"
-            placeholder="voce@email.com"
-            autocomplete="email"
-            class="w-full rounded-xl bg-white/[0.07] border border-white/10 px-4 py-3.5 text-sm text-white placeholder-zinc-600 outline-none transition-all duration-200 focus:border-orange-500/70 focus:ring-2 focus:ring-orange-500/20"
-          />
+    <!-- Interface Principal (Mobile-First de fato - max-w-md centralizado) -->
+    <main class="w-full max-w-md mx-auto relative flex flex-col justify-center px-8 py-12 z-10">
+      
+      <!-- Cabeçalho / Branding -->
+      <header class="flex flex-col items-center text-center mb-12">
+        <div class="w-16 h-16 bg-primary-container flex items-center justify-center rounded-xl mb-6 shadow-sm">
+          <!-- Ícone do Estalo: "bolt" preenchido -->
+          <span class="material-symbols-outlined text-primary text-4xl" data-weight="fill" style="font-variation-settings: 'FILL' 1;">bolt</span>
         </div>
+        <!-- Utilizando 'font-headline' com font 'Plus Jakarta Sans' conforme sua solicitação -->
+        <h1 class="text-3xl font-extrabold text-on-background tracking-tighter mb-2 font-headline">Fome de quê?</h1>
+        <p class="text-on-surface-variant font-medium">Entre num estalo</p>
+      </header>
 
-        <!-- CAMPO: Senha -->
-        <div class="group">
-          <div class="flex items-center justify-between mb-2">
-            <label
-              for="senha"
-              class="block text-xs font-semibold text-zinc-400 uppercase tracking-widest"
-            >
-              Senha
-            </label>
-            <!-- Link "Esqueci a senha" — rota será criada futuramente -->
-            <a
-              href="#"
-              class="text-xs text-orange-400 hover:text-orange-300 transition-colors duration-200"
-            >
-              Esqueci a senha
-            </a>
+      <!-- Snackbar/Caixa de Mensagem de Erro -->
+      <Transition name="fade">
+        <div
+          v-if="erroLogin"
+          class="flex items-center gap-2.5 rounded-2xl bg-error-container/20 border border-error/20 px-4 py-3 mb-6"
+        >
+          <span class="material-symbols-outlined text-error text-xl">error</span>
+          <p class="text-sm text-error font-medium">{{ erroLogin }}</p>
+        </div>
+      </Transition>
+
+      <!-- Formulário de Autenticação -->
+      <section class="space-y-6 pb-2">
+        <!-- O modificador .prevent previne o comportamento de reload padrão do form HTML -->
+        <form @submit.prevent="handleLogin" class="flex flex-col space-y-4">
+          
+          <!-- Box E-mail -->
+          <div class="relative group">
+            <input 
+              v-model="form.email"
+              class="w-full h-14 bg-surface-container-low border-none rounded-2xl px-6 font-medium text-on-surface placeholder:text-outline focus:ring-2 focus:ring-primary/20 transition-all outline-none" 
+              placeholder="E-mail" 
+              type="email"
+              required
+            />
           </div>
-          <!-- Wrapper relativo para posicionar o ícone de ver/ocultar senha inside do input -->
-          <div class="relative">
-            <input
-              id="senha"
+          
+          <!-- Box Senha com alternador de visibilidade ("Olhinho") -->
+          <div class="relative group">
+            <input 
               v-model="form.senha"
               :type="senhaVisivel ? 'text' : 'password'"
-              placeholder="••••••••"
-              autocomplete="current-password"
-              class="w-full rounded-xl bg-white/[0.07] border border-white/10 px-4 py-3.5 pr-12 text-sm text-white placeholder-zinc-600 outline-none transition-all duration-200 focus:border-orange-500/70 focus:ring-2 focus:ring-orange-500/20"
+              class="w-full h-14 bg-surface-container-low border-none rounded-2xl px-6 pr-14 font-medium text-on-surface placeholder:text-outline focus:ring-2 focus:ring-primary/20 transition-all outline-none" 
+              placeholder="Senha" 
+              required
             />
-            <!--
-              Botão de olhinho: alterna senhaVisivel entre true/false.
-              type="button" é obrigatório para NÃO submeter o formulário ao clicar.
-            -->
+            <!-- Botão de "ver senha" (Absolute, centralizado verticalmente do lado direito) -->
             <button
               type="button"
-              class="absolute right-3.5 top-1/2 -translate-y-1/2 text-zinc-500 hover:text-zinc-300 transition-colors duration-200"
-              :aria-label="senhaVisivel ? 'Ocultar senha' : 'Mostrar senha'"
+              class="absolute right-4 top-1/2 -translate-y-1/2 text-outline hover:text-on-surface transition-colors focus:outline-none"
+              tabindex="-1"
               @click="senhaVisivel = !senhaVisivel"
             >
-              <!-- Ícone "olho aberto" — exibe quando senha está oculta -->
-              <svg
-                v-if="!senhaVisivel"
-                xmlns="http://www.w3.org/2000/svg"
-                fill="none"
-                viewBox="0 0 24 24"
-                stroke-width="1.8"
-                stroke="currentColor"
-                class="w-5 h-5"
-              >
-                <path stroke-linecap="round" stroke-linejoin="round" d="M2.036 12.322a1.012 1.012 0 0 1 0-.639C3.423 7.51 7.36 4.5 12 4.5c4.638 0 8.573 3.007 9.963 7.178.07.207.07.431 0 .639C20.577 16.49 16.64 19.5 12 19.5c-4.638 0-8.573-3.007-9.964-7.178Z" />
-                <path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 1 1-6 0 3 3 0 0 1 6 0Z" />
-              </svg>
-              <!-- Ícone "olho riscado" — exibe quando senha está visível -->
-              <svg
-                v-else
-                xmlns="http://www.w3.org/2000/svg"
-                fill="none"
-                viewBox="0 0 24 24"
-                stroke-width="1.8"
-                stroke="currentColor"
-                class="w-5 h-5"
-              >
-                <path stroke-linecap="round" stroke-linejoin="round" d="M3.98 8.223A10.477 10.477 0 0 0 1.934 12C3.226 16.338 7.244 19.5 12 19.5c.993 0 1.953-.138 2.863-.395M6.228 6.228A10.451 10.451 0 0 1 12 4.5c4.756 0 8.773 3.162 10.065 7.498a10.522 10.522 0 0 1-4.293 5.774M6.228 6.228 3 3m3.228 3.228 3.65 3.65m7.894 7.894L21 21m-3.228-3.228-3.65-3.65m0 0a3 3 0 1 0-4.243-4.243m4.242 4.242L9.88 9.88" />
-              </svg>
+              <span class="material-symbols-outlined select-none">
+                {{ senhaVisivel ? 'visibility_off' : 'visibility' }}
+              </span>
             </button>
           </div>
-        </div>
-
-        <!-- FEEDBACK DE ERRO: só aparece quando erroLogin tem conteúdo -->
-        <Transition name="fade">
-          <div
-            v-if="erroLogin"
-            class="flex items-center gap-2.5 rounded-xl bg-rose-500/10 border border-rose-500/20 px-4 py-3"
-          >
-            <!-- Ícone de alerta inline -->
-            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" class="w-4 h-4 text-rose-400 shrink-0">
-              <path fill-rule="evenodd" d="M18 10a8 8 0 1 1-16 0 8 8 0 0 1 16 0Zm-8-5a.75.75 0 0 1 .75.75v4.5a.75.75 0 0 1-1.5 0v-4.5A.75.75 0 0 1 10 5Zm0 10a1 1 0 1 0 0-2 1 1 0 0 0 0 2Z" clip-rule="evenodd" />
-            </svg>
-            <p class="text-xs text-rose-400 font-medium">{{ erroLogin }}</p>
+          
+          <!-- Ações auxiliares do formulário -->
+          <div class="flex justify-end px-1 pt-1 pb-2">
+            <NuxtLink to="/esqueci-senha" class="text-sm font-semibold text-primary-dim hover:text-primary transition-colors">
+              Esqueceu a senha?
+            </NuxtLink>
           </div>
-        </Transition>
 
-        <!-- BOTÃO PRINCIPAL DE LOGIN -->
-        <!--
-          :disabled="carregando": desabilita o botão durante a requisição, evitando duplo clique.
-          O degradê do botão segue a identidade visual do logo Estalo.
-        -->
-        <button
-          type="submit"
-          :disabled="carregando"
-          class="relative w-full mt-2 rounded-xl py-3.5 text-sm font-bold text-white bg-gradient-to-r from-orange-500 via-rose-500 to-violet-600 shadow-lg shadow-orange-500/20 transition-all duration-300 hover:shadow-orange-500/40 hover:scale-[1.02] active:scale-[0.98] disabled:opacity-60 disabled:cursor-not-allowed disabled:hover:scale-100 overflow-hidden"
-        >
-          <!-- Estado normal do botão -->
-          <span v-if="!carregando" class="flex items-center justify-center gap-2">
-            Entrar no Estalo
-            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" class="w-4 h-4">
-              <path fill-rule="evenodd" d="M3 10a.75.75 0 0 1 .75-.75h10.638L10.23 5.29a.75.75 0 1 1 1.04-1.08l5.5 5.25a.75.75 0 0 1 0 1.08l-5.5 5.25a.75.75 0 1 1-1.04-1.08l4.158-3.96H3.75A.75.75 0 0 1 3 10Z" clip-rule="evenodd" />
-            </svg>
-          </span>
+          <!-- Botão Principal de Submissão -->
+          <button 
+            type="submit"
+            :disabled="carregando"
+            class="flex items-center justify-center w-full h-14 bg-inverse-surface text-surface-bright font-bold rounded-full active:scale-95 transition-transform duration-200 shadow-lg shadow-on-background/10 disabled:opacity-70 disabled:active:scale-100"
+          >
+            <!-- Caso não esteja em loading: -->
+            <template v-if="!carregando">
+              Entrar
+            </template>
+            <!-- Spinner caso esteja esperando o backend FastAPI: -->
+            <template v-else>
+              <svg class="animate-spin -ml-1 mr-3 h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+              </svg>
+              Entrando...
+            </template>
+          </button>
+        </form>
+      </section>
 
-          <!-- Estado de loading: spinner animado enquanto aguarda o back-end -->
-          <span v-else class="flex items-center justify-center gap-2">
-            <svg class="animate-spin h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-              <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4" />
-              <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 0 1 8-8V0C5.373 0 0 5.373 0 12h4z" />
-            </svg>
-            Entrando...
-          </span>
-        </button>
-      </form>
+      <!-- Logins com Redes Sociais -->
+      <section class="mt-8">
+        <!-- Divisor Customizado -->
+        <div class="relative flex items-center justify-center mb-8">
+          <div class="absolute inset-0 flex items-center">
+            <div class="w-full h-[1px] bg-outline-variant/30"></div>
+          </div>
+          <span class="relative px-4 bg-surface text-sm font-medium text-on-surface-variant">ou continue com</span>
+        </div>
+        
+        <div class="grid grid-cols-2 gap-4">
+          <!-- Botão Google -->
+          <button type="button" class="flex items-center justify-center h-14 bg-surface-container-lowest border border-outline-variant/20 rounded-full hover:bg-surface-container-low transition-colors active:scale-95 duration-200">
+            <Icon name="logos:google-icon" class="w-5 h-5 mr-3" />
+            <span class="font-semibold text-sm">Google</span>
+          </button>
+          <!-- Botão Apple -->
+          <button type="button" class="flex items-center justify-center h-14 bg-surface-container-lowest border border-outline-variant/20 rounded-full hover:bg-surface-container-low transition-colors active:scale-95 duration-200">
+            <Icon name="logos:apple" class="w-5 h-5 mr-3" />
+            <span class="font-semibold text-sm">Apple</span>
+          </button>
+        </div>
+      </section>
 
-      <!-- ====== DIVISOR ====== -->
-      <div class="my-7 flex items-center gap-4">
-        <div class="h-px flex-1 bg-white/10" />
-        <span class="text-xs text-zinc-600 font-medium">ou</span>
-        <div class="h-px flex-1 bg-white/10" />
+      <!-- Rodapé / CTA para Cadastro -->
+      <footer class="mt-12 text-center">
+        <p class="text-on-surface-variant font-medium">
+          Ainda não tem conta? 
+          <NuxtLink to="/cadastro" class="text-primary font-bold ml-1 hover:underline">Cadastre-se</NuxtLink>
+        </p>
+      </footer>
+
+      <!-- Detalhe Visual do Fundo (Borda da Marca) -->
+      <div class="mt-16 flex justify-center opacity-20">
+        <div class="h-1 w-12 bg-outline-variant rounded-full"></div>
       </div>
-
-      <!-- ====== LINK PARA CADASTRO ====== -->
-      <p class="text-center text-xs text-zinc-500">
-        Novo por aqui?
-        <!--
-          NuxtLink: componente do Nuxt para navegação SPA sem reload de página.
-          Rota /cadastro será criada futuramente.
-        -->
-        <NuxtLink
-          to="/cadastro"
-          class="ml-1 font-semibold text-orange-400 hover:text-orange-300 transition-colors duration-200"
-        >
-          Criar conta grátis
-        </NuxtLink>
-      </p>
-
-    </div>
+    </main>
   </div>
 </template>
 
 <style scoped>
 /*
-  Animação de fade para o bloco de erro.
-  Usamos <Transition name="fade"> no template, então o Vue
-  procura automaticamente pelas classes .fade-enter-* e .fade-leave-*.
-*/
+ * === TRANSIÇÕES ===
+ * A classe "fade" possibilita um visual de fade-in e slide para mensagens de alerta.
+ */
 .fade-enter-active,
 .fade-leave-active {
-  transition: all 0.25s ease;
+  transition: opacity 0.3s ease, transform 0.3s ease;
 }
 
 .fade-enter-from,
 .fade-leave-to {
   opacity: 0;
-  transform: translateY(-6px);
+  transform: translateY(-8px);
 }
 </style>

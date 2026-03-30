@@ -1,6 +1,6 @@
 <script setup>
 const navItems = [
-  { id: 1, icon: 'home',         label: 'Início',  active: true, to: '/iniciocliente' },
+  { id: 1, icon: 'home',         label: 'Início',  active: true, to: '/inicio' },
   { id: 2, icon: 'search',       label: 'Busca',   active: false, to: '/busca' },
   { id: 3, icon: 'local_fire_department', label: 'Estalos', active: false, to: '/estalos' },
   { id: 4, icon: 'receipt_long', label: 'Pedidos', active: false, to: '/pedidos' },
