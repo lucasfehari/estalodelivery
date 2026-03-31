@@ -47,6 +47,13 @@ const upsellItems = ref([
 ])
 
 const deliveryFee = ref(5.99)
+const formaPagamento = ref('PIX') // Valor padrão: PIX
+const trocoPara = ref('') // Começa vazio
+
+import { useAddress } from '~/composables/useAddress'
+
+// Modal e Estado de Endereço (Bottom Sheet via Global State)
+const { enderecoSelecionado, openAddressSheet } = useAddress()
 
 const subtotal = computed(() => {
   return cartItems.value.reduce((total, item) => total + (item.price * item.quantity), 0)
@@ -96,6 +103,11 @@ const fazerPedido = async () => {
     return
   }
 
+  if (!enderecoSelecionado.value) {
+    alert("Por favor, selecione um endereço de entrega.")
+    return
+  }
+
   // 1. Mapeamos os itens do carrinho para o formato que a API espera
   const itensParaEnvio = cartItems.value.map(item => ({
     id_produto: item.id,
@@ -108,6 +120,9 @@ const fazerPedido = async () => {
     id_loja: 101, // Bistro Pro
     id_cliente: 1,
     itens: itensParaEnvio,
+    forma_pagamento: formaPagamento.value,
+    troco_para: formaPagamento.value === 'DINHEIRO' ? trocoPara.value : null,
+    endereco_entrega: enderecoSelecionado.value, // Passando o endereço aqui
     data: new Date().toISOString()
   }
 
@@ -150,6 +165,27 @@ const fazerPedido = async () => {
         <span class="material-symbols-outlined text-[#6366f1]" data-icon="delete_outline">delete_outline</span>
       </button>
     </header>
+
+    <!-- Address Selection Banner -->
+    <section class="mx-4 mt-4 mb-2">
+      <div @click="openAddressSheet" class="bg-surface-container-lowest py-3 px-4 rounded-xl flex items-center justify-between shadow-sm cursor-pointer active:scale-95 transition-transform border border-gray-100">
+        <div class="flex items-center gap-3">
+          <div class="bg-primary/10 p-2 rounded-full">
+            <span class="material-symbols-outlined text-primary text-xl">location_on</span>
+          </div>
+          <div class="flex flex-col">
+            <span class="text-xs text-on-surface-variant font-bold">Entregar em</span>
+            <span class="text-sm font-headline font-extrabold text-on-surface truncate max-w-[200px]" v-if="enderecoSelecionado">
+              {{ enderecoSelecionado.rua }}, {{ enderecoSelecionado.numero }}
+            </span>
+            <span class="text-sm font-headline font-extrabold text-on-surface text-primary" v-else>
+              Selecionar Endereço
+            </span>
+          </div>
+        </div>
+        <span class="material-symbols-outlined text-on-surface-variant">chevron_right</span>
+      </div>
+    </section>
 
     <!-- Store Header -->
     <section class="mt-4 px-8 py-6 bg-surface-container-lowest rounded-xl mx-4 flex justify-between items-center">
@@ -203,6 +239,60 @@ const fazerPedido = async () => {
       </div>
     </section>
 
+    <!-- Seção de Forma de Pagamento -->
+    <section class="mt-8 mx-4 p-6 bg-white rounded-2xl shadow-sm border border-gray-100">
+      <h2 class="font-headline font-extrabold text-lg mb-4 text-on-surface flex items-center gap-2">
+        <span class="material-symbols-outlined text-primary">payments</span>
+        Forma de Pagamento
+      </h2>
+      
+      <div class="grid grid-cols-3 gap-3">
+        <!-- PIX -->
+        <div 
+          @click="formaPagamento = 'PIX'"
+          class="flex flex-col items-center justify-center p-4 rounded-xl border-2 transition-all duration-300 cursor-pointer"
+          :class="formaPagamento === 'PIX' ? 'border-black bg-gray-50' : 'border-gray-100 hover:border-gray-200'"
+        >
+          <span class="material-symbols-outlined text-green-600 mb-1">pix</span>
+          <span class="text-xs font-bold">PIX</span>
+        </div>
+
+        <!-- Cartão -->
+        <div 
+          @click="formaPagamento = 'CARTAO'"
+          class="flex flex-col items-center justify-center p-4 rounded-xl border-2 transition-all duration-300 cursor-pointer"
+          :class="formaPagamento === 'CARTAO' ? 'border-black bg-gray-50' : 'border-gray-100 hover:border-gray-200'"
+        >
+          <span class="material-symbols-outlined text-blue-600 mb-1">credit_card</span>
+          <span class="text-xs font-bold">Cartão</span>
+        </div>
+
+        <!-- Dinheiro -->
+        <div 
+          @click="formaPagamento = 'DINHEIRO'"
+          class="flex flex-col items-center justify-center p-4 rounded-xl border-2 transition-all duration-300 cursor-pointer"
+          :class="formaPagamento === 'DINHEIRO' ? 'border-black bg-gray-50' : 'border-gray-100 hover:border-gray-200'"
+        >
+          <span class="material-symbols-outlined text-yellow-600 mb-1">payments</span>
+          <span class="text-xs font-bold">Dinheiro</span>
+        </div>
+      </div>
+
+      <!-- Campo de Troco (Aparece apenas se Dinheiro estiver selecionado) -->
+      <div v-if="formaPagamento === 'DINHEIRO'" class="mt-4 animate-in fade-in slide-in-from-top-2 duration-300">
+        <label class="text-xs font-bold text-gray-500 mb-1 block">Precisa de troco para quanto?</label>
+        <div class="relative">
+          <span class="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 font-bold">R$</span>
+          <input 
+            v-model="trocoPara"
+            type="number" 
+            placeholder="0,00"
+            class="w-full bg-gray-100 border-none rounded-xl py-3 pl-10 pr-4 font-bold focus:ring-2 focus:ring-black outline-none transition-all"
+          >
+        </div>
+      </div>
+    </section>
+
     <!-- Summary Section -->
     <section class="mt-8 mx-4 p-8 bg-surface-container-lowest rounded-xl">
       <div class="space-y-4">
@@ -241,6 +331,9 @@ const fazerPedido = async () => {
         <span class="material-symbols-outlined" data-icon="bolt">bolt</span>
       </div>
     </nav>
+
+    <!-- Bottom Sheet Modal para Endereço Global -->
+    <SharedAddressBottomSheet />
   </main>
 </div>
 </template>

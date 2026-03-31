@@ -152,6 +152,13 @@ def criar_pedido(novo_pedido: Pedido):
     novo_pedido.taxa_entrega = taxa
     novo_pedido.total_pedido = round(subtotal_calculado + taxa, 2)
 
+    # 5.5. Regra de Negócio: Segurança financeira do caixa
+    # Se o cliente pediu troco, o valor do troco NÃO PODE ser menor que a conta!
+    if novo_pedido.forma_pagamento == 'DINHEIRO' and novo_pedido.troco_para is not None:
+        if novo_pedido.troco_para < novo_pedido.total_pedido:
+            from fastapi import HTTPException
+            raise HTTPException(status_code=400, detail="O valor do troco não pode ser menor que o total do pedido.")
+
     # 6. Carimba a hora exata da compra e guarda no cofre
     novo_pedido.data_hora = datetime.now()
     banco_de_pedidos.append(novo_pedido)
