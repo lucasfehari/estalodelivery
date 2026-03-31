@@ -90,8 +90,49 @@ const addUpsellToCart = (upsell: any) => {
   }
 }
 
-const handleCheckout = () => {
-  console.log("Iniciando fluxo de fechamento para: Total =>", formatPrice(totalOrderPrice.value))
+const fazerPedido = async () => {
+  if (cartItems.value.length === 0) {
+    alert("O seu carrinho está vazio!")
+    return
+  }
+
+  // 1. Mapeamos os itens do carrinho para o formato que a API espera
+  const itensParaEnvio = cartItems.value.map(item => ({
+    id_produto: item.id,
+    quantidade: item.quantity
+    // O backend vai buscar o preço real pelo id_produto
+  }))
+
+  const meuPedido = {
+    id_pedido: Math.floor(Math.random() * 1000),
+    id_loja: 101, // Bistro Pro
+    id_cliente: 1,
+    itens: itensParaEnvio,
+    data: new Date().toISOString()
+  }
+
+  try {
+    const response = await fetch("http://localhost:8000/pedidos", {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify(meuPedido)
+    })
+
+    if (response.ok) {
+      const data = await response.json()
+      cartItems.value = [] // Limpa o carrinho
+      
+      // Redireciona para a tela de confirmação de pedido
+      navigateTo('/pedido-confirmado')
+    } else {
+      const errorData = await response.json().catch(() => ({}))
+      console.error("Erro na resposta do servidor:", errorData)
+    }
+  } catch (error) {
+    console.error("Erro de rede:", error)
+  }
 }
 </script>
 
@@ -183,7 +224,7 @@ const handleCheckout = () => {
     <!-- Fixed Bottom Action Bar -->
     <footer class="fixed bottom-0 left-0 right-0 max-w-md mx-auto z-50 p-6" v-show="cartItems.length > 0">
       <div class="bg-surface-container-lowest/90 rounded-xl shadow-[0_-10px_40px_rgba(39,46,66,0.1)] p-4 flex flex-col gap-4">
-        <button @click="handleCheckout" class="w-full h-16 rounded-full bg-primary text-white font-headline font-extrabold text-lg flex items-center justify-between px-8 active:scale-95 transition-all duration-200 shadow-xl shadow-primary/20">
+        <button @click="fazerPedido" class="w-full h-16 rounded-full bg-primary text-white font-headline font-extrabold text-lg flex items-center justify-between px-8 active:scale-95 transition-all duration-200 shadow-xl shadow-primary/20">
           <span class="tracking-tight">Fazer Pedido</span>
           <div class="h-6 w-px bg-white/30"></div>
           <span>{{ formatPrice(totalOrderPrice) }}</span>

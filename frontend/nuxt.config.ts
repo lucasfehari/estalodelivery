@@ -4,7 +4,7 @@ export default defineNuxtConfig({
   devtools: { enabled: true },
 
   // Módulos do Nuxt: Tailwind CSS integrado nativamente
-  modules: ['@nuxtjs/tailwindcss', '@nuxt/icon'],
+  modules: ['@nuxtjs/tailwindcss', '@nuxt/icon', '@pinia/nuxt'],
 
   // CSS global aplicado em todas as páginas (contém as diretivas @tailwind)
   css: ['~/assets/css/main.css'],
