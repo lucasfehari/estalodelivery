@@ -1,16 +1,7 @@
 <script setup>
 // ─── Mock Data ───────────────────────────────────────────────────────────────
 
-const categories = [
-  { id: 1, emoji: '🍔', label: 'Lanches' },
-  { id: 2, emoji: '🛒', label: 'Mercado' },
-  { id: 3, emoji: '💊', label: 'Farmácia' },
-  { id: 4, emoji: '🎧', label: 'Eletrônicos' },
-  { id: 5, emoji: '🥤', label: 'Bebidas' },
-  { id: 6, emoji: '🐾', label: 'Pet' },
-  { id: 7, emoji: '🧁', label: 'Doces' },
-  { id: 8, emoji: '⚡', label: 'Express' },
-]
+
 
 const banners = [
   {
@@ -106,7 +97,7 @@ const user = {
     <HomeSearch />
 
     <!-- Categories Grid -->
-    <HomeCategories :categories="categories" />
+    <HomeCategories />
 
     <!-- Banners Carousel -->
     <HomeBanners :banners="banners" />

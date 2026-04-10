@@ -57,7 +57,7 @@ const pulseItems = [
         :item="item"
       />
     </main>
-    <HomeBottomNavBar />
+    <LayoutNavbar />
 </div>
 </template>
 
